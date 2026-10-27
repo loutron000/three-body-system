@@ -67,33 +67,90 @@ function animate() {
 requestAnimationFrame(animate);
 
 
-const VIEW_SCALE = 180;
 
-function worldToScreen(body) {
+const MAX_VIEW_SCALE = 180;
+const MIN_VIEW_SCALE = 12;
+
+let viewScale = MAX_VIEW_SCALE;
+
+function calculateCamera() {
+  const bodies = system.bodies;
+
+  let totalMass = 0;
+  let weightedX = 0;
+  let weightedY = 0;
+
+  for (const body of bodies) {
+    totalMass += body.mass;
+    weightedX += body.mass * body.x;
+    weightedY += body.mass * body.y;
+  }
+
+  const cameraX = weightedX / totalMass;
+  const cameraY = weightedY / totalMass;
+
+  let maxDistanceX = 0;
+  let maxDistanceY = 0;
+
+  for (const body of bodies) {
+    maxDistanceX = Math.max(
+      maxDistanceX,
+      Math.abs(body.x - cameraX)
+    );
+
+    maxDistanceY = Math.max(
+      maxDistanceY,
+      Math.abs(body.y - cameraY)
+    );
+  }
+
+  const availableWidth = width * 0.42;
+  const availableHeight = height * 0.42;
+
+  const scaleX = maxDistanceX > 0
+    ? availableWidth / maxDistanceX
+    : MAX_VIEW_SCALE;
+
+  const scaleY = maxDistanceY > 0
+    ? availableHeight / maxDistanceY
+    : MAX_VIEW_SCALE;
+
+  const targetScale = Math.max(
+    MIN_VIEW_SCALE,
+    Math.min(MAX_VIEW_SCALE, scaleX, scaleY)
+  );
+
+  viewScale += (targetScale - viewScale) * 0.06;
+
+  return { cameraX, cameraY };
+}
+
+function worldToScreen(body, camera) {
   return {
-    x: centerX + body.x * VIEW_SCALE,
-    y: centerY - body.y * VIEW_SCALE
+    x: centerX + (body.x - camera.cameraX) * viewScale,
+    y: centerY - (body.y - camera.cameraY) * viewScale
   };
 }
 
 
 
-function drawBodies() {
+function drawBodies(camera) {
+  const colors = ["#8be9fd", "#c4a7ff", "#ffb86c"];
+
   for (let i = 0; i < system.bodies.length; i++) {
     const body = system.bodies[i];
-    const position = worldToScreen(body);
+    const position = worldToScreen(body, camera);
 
-    const colors = ["#8be9fd", "#c4a7ff", "#ffb86c"];
-    const color = colors[i];
+    const radius = Math.max(2, Math.min(5, viewScale * 0.028));
 
     ctx.beginPath();
-    ctx.arc(position.x, position.y, 5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
+    ctx.arc(position.x, position.y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i];
     ctx.fill();
 
     ctx.beginPath();
-    ctx.arc(position.x, position.y, 12, 0, Math.PI * 2);
-    ctx.fillStyle = color;
+    ctx.arc(position.x, position.y, radius * 2.4, 0, Math.PI * 2);
+    ctx.fillStyle = colors[i];
     ctx.globalAlpha = 0.12;
     ctx.fill();
     ctx.globalAlpha = 1;
@@ -101,12 +158,17 @@ function drawBodies() {
 }
 
 
+
+
 function animate() {
   ctx.clearRect(0, 0, width, height);
 
   updateSimulation();
 
-  drawBodies();
+  const camera = calculateCamera();
+  drawBodies(camera);
 
   requestAnimationFrame(animate);
 }
+
+requestAnimationFrame(animate);
