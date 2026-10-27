@@ -1,0 +1,49 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#05060b">
+
+  <title>Three-Body System</title>
+  <meta
+    name="description"
+    content="An evolving gravitational three-body system, visualized in real time."
+  />
+
+  <link rel="stylesheet" href="style.css">
+  <script src="physics.js" defer></script>
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <main id="universe" aria-label="Three-body gravitational simulation">
+    <canvas id="space" aria-label="Animated visualization of three gravitationally interacting bodies"></canvas>
+
+    <section
+      id="about-card"
+      class="about-card"
+      aria-label="About this simulation"
+      aria-hidden="true"
+      hidden
+    >
+      <button
+        id="close-about"
+        class="close-about"
+        type="button"
+        aria-label="Close about panel"
+      >
+        &times;
+      </button>
+
+      <p class="eyebrow">A small universe</p>
+      <h1>Three-Body System</h1>
+      <p>
+        Three masses. Mutual gravity. A universe that evolves
+        one time step at a time.
+      </p>
+      <p class="about-credit">Built by Loutron.</p>
+    </section>
+  </main>
+</body>
+</html>
